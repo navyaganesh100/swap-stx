@@ -11,6 +11,7 @@ The caller has enough STX to cover the swap.
 The pool call executes successfully.
 
 Any swap failure reverts with a clear error.
+<img width="1920" height="1080" alt="Screenshot from 2025-08-20 01-10-12" src="https://github.com/user-attachments/assets/f9b0cdf5-3471-4a43-aaf6-daf23c9eeb89" />
 
 ⭐ Features
 
