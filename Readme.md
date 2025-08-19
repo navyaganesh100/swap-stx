@@ -1,38 +1,92 @@
-Deployed Contract Address = ST3WS0T17AP8FMT7NXC6J6FWJH5X5QFPAVHBPY5N1.nft-tree
-
-🪙 Simple Token + NFT Counter (Stacks / Clarity)
+Deployed Contract Address = ST87DZSKM3M2NR2EB6G25ZP13GW9Q25026D24VEJ.swap-stx
+🔄 STX → sBTC Swap Contract (Stacks / Clarity)
 📜 Overview
 
-This is a minimal Clarity smart contract designed to deploy easily on Stacks with Clarinet.
+This smart contract provides a simple interface to swap STX for sBTC using an existing Univ2 liquidity pool deployed on Stacks.
 
-It provides:
+It wraps the swap function of the pool contract and ensures:
 
-A basic fungible token (FT)
+The caller has enough STX to cover the swap.
 
-A basic non-fungible token (NFT)
+The pool call executes successfully.
 
-A simple counter variable for testing
-
-Perfect for learning, demos, or boilerplate for bigger projects.
+Any swap failure reverts with a clear error.
 
 ⭐ Features
 
-Fungible token minting (ft-mint?)
+✅ Swap STX → sBTC in a single call.
 
-NFT minting (nft-mint?) with incremental IDs
+✅ Protects against insufficient balances.
 
-Read-only counter tracking number of NFTs minted
+✅ Emits the underlying swap event on success.
 
-Deploys without errors (compatible with clarinet check)
+✅ Safe error codes for debugging.
 
-📦 Contract Functions
-🔎 Read-Only
-Function	Description
-get-counter	Returns current counter value (number of NFTs minted so far)
-✍️ Public Calls
-Function	Description
-mint-tokens (amount uint)	Mints FT to tx-sender
-mint-nft	Mints a new NFT with ID = current counter, increments counter
-⚠️ Error Handling
+⚙️ Error Codes
+Code Meaning
+u100 → ERR-SWAP-FAILED Pool swap call failed
+u101 → ERR-INSUFFICIENT-FUNDS Caller balance < requested STX amount
+📦 Contract Function
+swap-stx-for-sbtc (stx-amount uint)
 
-This is a demo contract — no custom error codes are defined. If a mint operation fails, the built-in ft-mint? or nft-mint? will return (err ...).
+Swaps the given amount of STX into sBTC using the external pool.
+
+Parameters:
+
+stx-amount → The number of STX tokens to swap.
+
+Flow:
+
+Checks that caller (tx-sender) has enough STX.
+
+Calls the external Univ2 pool contract’s swap function:
+
+Token In: wstx (wrapped STX)
+
+Token Out: sbtc-token
+
+Fee contract: univ2-fees-v1_0_0-0070
+
+If the pool swap fails, aborts with ERR-SWAP-FAILED.
+
+Returns the raw swap event data on success.
+
+Example Call:
+
+(contract-call? .stx-sbtc-swap swap-stx-for-sbtc u1000000) ;; swap 1 STX (1_000_000 microSTX)
+
+🛠️ Usage
+Local Deployment (Clarinet)
+clarinet new stx-sbtc-swap
+cd stx-sbtc-swap
+
+# replace contracts/stx-sbtc-swap.clar with this contract
+
+clarinet check
+clarinet console
+
+On Testnet
+
+Deploy via Stacks CLI
+or Clarinet.
+
+Open in Hiro Explorer
+.
+
+Call swap-stx-for-sbtc with the desired stx-amount.
+
+📄 Security Notes
+
+This contract depends on external Univ2 pool contracts:
+
+Pool: SP20X3DC5R091J8B6YPQT638J8NR1W83KN6TN5BJY.univ2-pool-v1_0_0-0070
+
+Fee: SP20X3DC5R091J8B6YPQT638J8NR1W83KN6TN5BJY.univ2-fees-v1_0_0-0070
+
+Make sure these addresses match the ones on your target chain (testnet/mainnet).
+
+The min-amount-out is hardcoded to u1 (may expose slippage risk).
+
+📄 License
+
+MIT — free to use, fork, and adapt.
